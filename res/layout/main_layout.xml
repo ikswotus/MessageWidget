@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?> 
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="2dip"
+    android:background="@drawable/widget_frame"
+    android:orientation="vertical" >
+    
+    <ListView xmlns:android="http://schemas.android.com/apk/res/android"
+  			  android:id="@+id/message_list"
+ 		      android:layout_width="match_parent"
+              android:layout_height="230sp"
+              android:layout_marginTop="3dp"
+              android:layout_marginLeft="3dp"
+			  android:background="@drawable/dark_gray"
+    />
+    <!-- Bottom row has a button to refresh the view(We could listen for new texts and update automatically
+    	 and a compose which simply opens a new messaging activity    -->
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/buttonRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/refreshButton"
+            android:layout_width="100sp"
+            android:layout_height="30sp"
+            android:text="@string/refresh_button"
+            android:textSize="10sp"
+            android:textColor="@color/text_white"
+        />
+
+        <Button
+            android:id="@+id/composeButton"
+            android:layout_width="100sp"
+            android:layout_height="30sp"
+            android:text="@string/compose_button"
+            android:textSize="10sp"
+            android:textColor="@color/text_white"
+        />
+        
+    </LinearLayout>
+
+
+</LinearLayout> 
+

@@ -1,0 +1,47 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.messaginglistwidget"
+    android:versionCode="1"
+    android:versionName="1.0">
+
+    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="15" />
+
+    <!--  For identifying the sender of texts -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <!--  To automatically update the view -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <!-- This one's fairly obvious - So we can display the inbox -->
+    <uses-permission android:name="android.permission.READ_SMS" />
+    
+    <application android:label="@string/app_name"
+        android:icon="@drawable/ic_launcher"
+        android:theme="@style/AppTheme">
+
+    <receiver
+       android:label="MLW"
+       android:name="MessagingProvider" >
+       <intent-filter >
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            <action android:name="android.provider.Telephony.SMS_RECEIVED"
+                	android:priority="1"
+                	 />
+       </intent-filter>
+
+       <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/widget_info" />
+	</receiver> 
+
+    <!--  Allows us to setup the list view using the remoteviewsfactory -->
+    <service android:name="MessagingService"
+             android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+    <!--  Our configuration activity -->
+    <activity android:name=".MessagingConfigureActivity">
+    	<intent-filter>
+       	 	<action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
+    	</intent-filter>
+	</activity>
+    
+    </application>
+
+</manifest>

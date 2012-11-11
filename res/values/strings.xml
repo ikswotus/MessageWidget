@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">MessagingListWidget</string>
+
+    <!--  Colors to use in styles -->
+    <color name="text_white">#FFFFFFFF</color>
+    
+    <!--  Button labels -->
+    <string name="refresh_button">Refresh</string>
+    <string name="compose_button">Compose</string>
+
+</resources>
