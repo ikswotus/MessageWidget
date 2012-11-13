@@ -13,6 +13,15 @@ import android.widget.RemoteViews;
 import android.net.Uri;
 import android.os.Bundle;
 
+/**
+ * TODO: Dynamically register/unregister the receiver for incoming text messages based on the configuration option? Is that allowed for widgets?
+ * 	-> Fix the counting 
+ * 
+ * 
+ */
+
+
+
 public class MessagingProvider extends AppWidgetProvider
 {
 	// TODO WHY ARE THESE PUBLIC?????
@@ -90,16 +99,21 @@ public class MessagingProvider extends AppWidgetProvider
         	// Start generic compose activity - no specific thread
         	startMessagingActivity(p_context);
         }
-        else if(p_intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED") ||
-                (p_intent.getAction().equals(ACTION_REFRESH)))
+        else if(p_intent.getAction().equals(ACTION_REFRESH))
         {
         	// New Text - Update the view.
         	AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(p_context);
        	 	appWidgetManager.notifyAppWidgetViewDataChanged(
        	 			appWidgetManager.getAppWidgetIds(new ComponentName(p_context, MessagingProvider.class )), R.id.message_list);       	
         }
+        else if(m_activeListen && p_intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED"))
+        {
+        	// We're configured to actively update the view on new texts - do so now!
+        	AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(p_context);
+       	 	appWidgetManager.notifyAppWidgetViewDataChanged(
+       	 			appWidgetManager.getAppWidgetIds(new ComponentName(p_context, MessagingProvider.class )), R.id.message_list);  
+        }
 	}
-	
 	
 	private void startMessagingActivity(Context p_context)
 	{
