@@ -9,7 +9,10 @@ import com.example.util.SmsHolder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract.PhoneLookup;
+import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 import android.appwidget.AppWidgetManager;
@@ -132,17 +135,22 @@ public class MessageViewsFactory implements RemoteViewsService.RemoteViewsFactor
 	{
 		log(" Getting view at: " + p_position);
 
-		RemoteViews row=new RemoteViews(m_context.getPackageName(),
-                R.layout.row);
-		
+		RemoteViews rowView = new RemoteViews(m_context.getPackageName(),
+                                              R.layout.row);		
+		// If count was empty - display the following view
 		if(m_useEmpty == true)
 		{
 			log("No messages - bailing");
-		    row.setTextViewText(R.id.row_item, "No messages");
-		    return row;
+		    rowView.setTextViewText(R.id.row_contact, "No messages");
+		    return rowView;
 		}
 
-	    row.setTextViewText(R.id.row_item, m_smsList.get(p_position).getContact() + " : " + m_smsList.get(p_position).getBody());
+		// Else - We have messages - populate the inner textviews
+	    rowView.setTextViewText(R.id.row_contact, m_smsList.get(p_position).getContact());
+	    // TODO enforce a size limit on the text we display in the widget...25 chars?
+	    rowView.setTextViewText(R.id.row_body, m_smsList.get(p_position).getBody());
+	    // TODO Convert this to a date
+	    rowView.setTextViewText(R.id.row_date, formatTimeStampString(m_smsList.get(p_position).getTime(), false));
 
 	    Intent i = new Intent();
 	    Bundle extras = new Bundle();
@@ -150,9 +158,9 @@ public class MessageViewsFactory implements RemoteViewsService.RemoteViewsFactor
 	    // Add the sms thread id to the extras!
 	    extras.putLong(MessagingProvider.SMS_THREAD_ID, m_smsList.get(p_position).getID());
 	    i.putExtras(extras);
-	    row.setOnClickFillInIntent(R.id.row_item, i);
+	    rowView.setOnClickFillInIntent(R.id.row_item, i);
 
-	    return(row);
+	    return(rowView);
 	}
 
 	@Override
@@ -245,11 +253,11 @@ public class MessageViewsFactory implements RemoteViewsService.RemoteViewsFactor
         	//Log.d("MVF","Moving to next: " + Long.toString(smsCursor.getLong(1)));
         	if(p_pushFront)
         	{
-        		m_smsList.addFirst( new SmsHolder(smsCursor.getString(5), getContactNameFromNumber(smsCursor.getString(2)), smsCursor.getLong(1)));
+        		m_smsList.addFirst( new SmsHolder(smsCursor.getString(5), getContactNameFromNumber(smsCursor.getString(2)), smsCursor.getLong(1), smsCursor.getLong(4)));
         	}
         	else
         	{
-        		m_smsList.add( new SmsHolder(smsCursor.getString(5), getContactNameFromNumber(smsCursor.getString(2)), smsCursor.getLong(1)));
+        		m_smsList.add( new SmsHolder(smsCursor.getString(5), getContactNameFromNumber(smsCursor.getString(2)), smsCursor.getLong(1), smsCursor.getLong(4)));
         	}
         }
                
@@ -292,5 +300,44 @@ public class MessageViewsFactory implements RemoteViewsService.RemoteViewsFactor
     	contactLookupCursor.close();
     
     	return contact;
+    }
+
+    /**
+     * Stolen from packages/apps/Mms/src/com/android/mms/messageutils.java
+     * Converts a 'long' date into a timestamp string
+     * 
+     * @param p_timestamp The date from the messsage
+     * @param p_fullFormat True if we should include the full date
+     */
+    public String formatTimeStampString(long p_timestamp, boolean fullFormat) {
+        Time then = new Time();
+        then.set(p_timestamp);
+        Time now = new Time();
+        now.setToNow();
+
+        // Basic settings for formatDateTime() we want for all cases.
+        int format_flags = DateUtils.FORMAT_NO_NOON_MIDNIGHT |
+                           DateUtils.FORMAT_ABBREV_ALL |
+                           DateUtils.FORMAT_CAP_AMPM;
+
+        // If the message is from a different year, show the date and year.
+        if (then.year != now.year) {
+            format_flags |= DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_DATE;
+        } else if (then.yearDay != now.yearDay) {
+            // If it is from a different day than today, show only the date.
+            format_flags |= DateUtils.FORMAT_SHOW_DATE;
+        } else {
+            // Otherwise, if the message is from today, show the time.
+            format_flags |= DateUtils.FORMAT_SHOW_TIME;
+        }
+
+        // If the caller has asked for full details, make sure to show the date
+        // and time no matter what we've determined above (but still make showing
+        // the year only happen if it is a different year from today).
+        if (fullFormat) {
+            format_flags |= (DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME);
+        }
+
+        return DateUtils.formatDateTime(m_context, p_timestamp, format_flags);
     }
 }

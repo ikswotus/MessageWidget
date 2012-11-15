@@ -1,11 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/row_item"
-    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+<TextView
+    android:id="@+id/row_contact"
+    android:layout_width="wrap_content"
     android:layout_height="18dip"
     android:textSize="10dip"
-    android:gravity="left"
+    android:layout_alignParentLeft="true" 
+    android:textColor="@color/text_icsblue"
+/>
+<TextView
+    android:id="@+id/row_body" 
+    android:layout_width="80dip"
+    android:layout_height="18dip"
+    android:textSize="10dip"
+    android:layout_toRightOf="@id/row_contact"
     android:paddingLeft="4dip"
     android:textColor="@color/text_white"
-/>
+    />
+<TextView
+    android:id="@+id/row_date"
+    android:layout_width="wrap_content"
+    android:layout_height="18dip" 
+    android:layout_alignParentRight="true"
+    android:layout_alignParentBottom="true"
+    android:textSize="8dip"
+    android:textColor="@color/text_icsblue"
+    />
+</RelativeLayout>

@@ -3,6 +3,7 @@
 
     <!--  Colors to use in styles -->
     <color name="text_white">#FFFFFFFF</color>
+    <color name="text_icsblue">#33B5E5</color>
     
     <!--  Button labels -->
     <string name="refresh_button">Refresh</string>

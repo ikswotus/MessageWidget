@@ -8,14 +8,42 @@
     android:background="@drawable/widget_frame"
     android:orientation="vertical" >
     
+    <!--  Top row contains the various tabs (Which will be implemented slowly...) The listview (and likely the buttons) will need to change to reflect the currently selected tab -->
+    <LinearLayout
+        android:id="@+id/tab_row"
+        android:layout_width="match_parent"
+        android:layout_height="30sp"
+        android:layout_margin="2dip"
+        android:orientation="horizontal"
+        >
+	<!--  TODO: Counters will need relative layouts?
+				Replace the buttons with clickable images
+	-->
+    <Button 
+        android:id="@+id/smsTab"
+        android:layout_width="50sp"
+        android:layout_height="match_parent"
+        android:text="SMS"
+        android:textSize="10dip"
+        android:textColor="@color/text_white" />
+    <Button
+        android:id="@+id/phoneTab"
+        android:layout_width="50sp"
+        android:layout_height="match_parent"
+        android:text="PHO"
+        android:textSize="10dip"
+        android:textColor="@color/text_white" />
+    
+    </LinearLayout>
+    
     <ListView xmlns:android="http://schemas.android.com/apk/res/android"
   			  android:id="@+id/message_list"
  		      android:layout_width="match_parent"
-              android:layout_height="230sp"
-              android:layout_marginTop="3dp"
+              android:layout_height="200sp"
               android:layout_marginLeft="3dp"
 			  android:background="@drawable/dark_gray"
-    />
+    />  
+    
     <!-- Bottom row has a button to refresh the view(We could listen for new texts and update automatically
     	 and a compose which simply opens a new messaging activity    -->
     <LinearLayout
