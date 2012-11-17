@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="2dip"
-    android:background="@drawable/widget_frame"
+    android:background="@drawable/edit_dark"
     android:orientation="vertical" >
     
     <!--  Top row contains the various tabs (Which will be implemented slowly...) The listview (and likely the buttons) will need to change to reflect the currently selected tab -->
@@ -33,6 +33,13 @@
         android:text="PHO"
         android:textSize="10dip"
         android:textColor="@color/text_white" />
+
+    <ToggleButton
+        android:id="@+id/toggleButton1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Email"
+      />
     
     </LinearLayout>
     
@@ -41,7 +48,8 @@
  		      android:layout_width="match_parent"
               android:layout_height="200sp"
               android:layout_marginLeft="3dp"
-			  android:background="@drawable/dark_gray"
+              
+			  android:background="@drawable/edit_dark"
     />  
     
     <!-- Bottom row has a button to refresh the view(We could listen for new texts and update automatically

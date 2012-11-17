@@ -39,6 +39,17 @@ public class MessagingProvider extends AppWidgetProvider
     /** Provides the MessageViewsFactory a name to associate with the ID */
 	public static final String SMS_THREAD_ID = "SMS_THREAD_ID";
 
+	/** Provides the PhoneViewsFactory with an ID to store the call_id in so we can access it here */
+	public static final String PHONE_CALL_ID = "PHONE_CALL_ID";
+	
+	/** Sent with a ListClick event - Will identify the type of action */
+	public enum ItemType
+	{
+		sms,
+		call,
+		email
+	}
+	
 	/** Action for when a list item is pressed */
 	private static final String LIST_CLICK = "LIST_CLICK";
 	
@@ -66,6 +77,8 @@ public class MessagingProvider extends AppWidgetProvider
 		 Log.d(TAG, p_message);
 	 }
 	
+	 /** Tracks which tab is currently active */
+	 private int m_currentTab;
 	
 	/**
 	 * Called from the ConfigurationActivity to perform initial setup once the user has confirmed the options.
@@ -84,6 +97,7 @@ public class MessagingProvider extends AppWidgetProvider
 		updateHelper(p_context, p_manager, p_widgetID);
 	}
 	
+	
 	/**
 	 *	Helper function to handle setting up the widget (initially after configuration and when onUpdate() is called
 	 *
@@ -91,17 +105,14 @@ public class MessagingProvider extends AppWidgetProvider
 	 * @param p_manager
 	 * @param p_widgetID
 	 */
-	static void updateHelper(Context p_context, AppWidgetManager p_manager, int p_widgetID)
+	static void updateHelper(Context p_context, AppWidgetManager p_manager, int p_widgetID, Intent p_serviceIntent)
 	{
-	      Intent svcIntent = new Intent(p_context, MessagingService.class);
-	      
-	      svcIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_widgetID);
-	      svcIntent.setData(Uri.parse(svcIntent.toUri(Intent.URI_INTENT_SCHEME)));
+
 	      
 	      RemoteViews widget = new RemoteViews(p_context.getPackageName(),
 	                                          R.layout.main_layout);
 	      
-	      widget.setRemoteAdapter(R.id.message_list, svcIntent);
+	      widget.setRemoteAdapter(R.id.message_list, p_serviceIntent);
 
 	      Intent clickIntent = new Intent(p_context, MessagingProvider.class);
 	      clickIntent.setAction(LIST_CLICK);
@@ -122,31 +133,48 @@ public class MessagingProvider extends AppWidgetProvider
 	      //Register our tabs with actions
 	      Intent smsIntent = new Intent(p_context, MessagingProvider.class);
 	      smsIntent.setAction(SMS_TAB);
+	      smsIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_widgetID);
+
 	      PendingIntent pendingSms = PendingIntent.getBroadcast(p_context, p_widgetID, smsIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 	      widget.setOnClickPendingIntent(R.id.smsTab, pendingSms);
 	      
 	      Intent phoneIntent = new Intent(p_context, MessagingProvider.class);
 	      phoneIntent.setAction(PHONE_TAB);
+	      phoneIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_widgetID);
+
 	      PendingIntent pendingPhone = PendingIntent.getBroadcast(p_context, p_widgetID, phoneIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 	      widget.setOnClickPendingIntent(R.id.phoneTab, pendingPhone);
 	      
 	      p_manager.updateAppWidget(p_widgetID, widget);
 	}
 	
-	
+	static void updateHelper(Context p_context, AppWidgetManager p_manager, int p_widgetID)
+	{
+	      Intent svcIntent = new Intent(p_context, MessagingService.class);
+	      
+	      svcIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_widgetID);
+	      svcIntent.setData(Uri.parse(svcIntent.toUri(Intent.URI_INTENT_SCHEME)));
+	      updateHelper(p_context, p_manager, p_widgetID, svcIntent);
+	}
 	
 	@Override
 	public void onReceive(Context p_context, Intent p_intent)
 	{
 		log(" onReceive E");
 
-        super.onReceive(p_context, p_intent);
-
         if(p_intent.getAction().equals(LIST_CLICK))
         {
         	Bundle bun = p_intent.getExtras();
         	// Pass the thread ID to the messaging activity
-        	startMessagingThreadActivity(p_context, bun.getLong(SMS_THREAD_ID));
+        	if(bun.getLong(SMS_THREAD_ID) == 0)
+        	{
+        		// Should have PHONE_THREAD_ID
+        		startCallLogActivity(p_context, bun.getLong(PHONE_CALL_ID));
+        	}
+        	else
+        	{
+            	startMessagingThreadActivity(p_context, bun.getLong(SMS_THREAD_ID));
+        	}
         }
         else if(p_intent.getAction().equals(ACTION_COMPOSE))
         {
@@ -171,11 +199,27 @@ public class MessagingProvider extends AppWidgetProvider
         {
         	// for now just log a message
         	log(" onReceive - SMS Tab selected!");
+        	m_currentTab = R.id.smsTab;
+            updateHelper(p_context, AppWidgetManager.getInstance(p_context), p_intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID));
+
         }
         else if(p_intent.getAction().equals(PHONE_TAB))
         {
         	log(" onReceive - PHONE Tab selected! ");
+            m_currentTab = R.id.phoneTab;
+        	// call update to switch the view
+            Intent serviceIntent = new Intent(p_context, PhoneService.class);
+            serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID));
+            serviceIntent.setData(Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME)));
+
+            updateHelper(p_context, AppWidgetManager.getInstance(p_context), p_intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID), serviceIntent);
+            // Notify the content has changed?
+            AppWidgetManager.getInstance(p_context).notifyAppWidgetViewDataChanged(
+            		AppWidgetManager.getInstance(p_context).getAppWidgetIds(new ComponentName(p_context, MessagingProvider.class )), R.id.message_list);  
         }
+
+        super.onReceive(p_context, p_intent);
+
 	}
 	
 	/**
@@ -211,6 +255,21 @@ public class MessagingProvider extends AppWidgetProvider
         p_context.startActivity(newIntent);	
 	}
 	
+	/**
+	 * Opens a details page for a call.
+	 * @param p_context
+	 * @param p_callID
+	 */
+	private void startCallLogActivity(Context p_context, Long p_callID)
+	{
+		Intent newIntent = new Intent(Intent.ACTION_MAIN);
+		newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		newIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+		newIntent.setClassName("com.android.contacts", "com.android.contacts.CallDetailActivity");
+		newIntent.setData(ContentUris.withAppendedId(Uri.parse("content://call_log/calls"), p_callID));
+		p_context.startActivity(newIntent);
+	}
+
 	@Override
 	public void onUpdate(Context p_context,
 						 AppWidgetManager p_widgetManager,
@@ -218,9 +277,9 @@ public class MessagingProvider extends AppWidgetProvider
 	{
 		Log.d("MP: ", "onUpdate E");
 
-		 for (int i=0; i< p_widgetIDs.length; i++)
+		 for (int widgetID : p_widgetIDs)
 		 {
-			 updateHelper(p_context, p_widgetManager, p_widgetIDs[i]);
+			 updateHelper(p_context, p_widgetManager, widgetID);
 		 }
 		 super.onUpdate(p_context, p_widgetManager, p_widgetIDs);
 	}

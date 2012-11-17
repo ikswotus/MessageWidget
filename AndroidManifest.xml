@@ -34,7 +34,8 @@
     <!--  Allows us to setup the list view using the remoteviewsfactory -->
     <service android:name="MessagingService"
              android:permission="android.permission.BIND_REMOTEVIEWS" />
-
+    <service android:name="PhoneService"
+             android:permission="android.permission.BIND_REMOTEVIEWS" />
     <!--  Our configuration activity -->
     <activity android:name=".MessagingConfigureActivity">
     	<intent-filter>

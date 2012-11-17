@@ -2,8 +2,8 @@ package com.example.messaginglistwidget;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Stack;
 
+import com.example.util.CommonUtils;
 import com.example.util.SmsHolder;
 
 import android.net.Uri;
@@ -12,19 +12,21 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
-import android.view.ViewGroup;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
-import android.appwidget.AppWidgetManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 
 /**
+ * This is the main tab view - Displays a list of all recent text messages
+ * 
  * TODO:
  * 	1) investigate getLoadingView() - Currently we'll have 'Syncing...' displayed in EVERY textview in the list. It'd be nice
  * to have only a single view displayed.
+ *  2) Outgoing message? 
+ *  3) Use conversation lists instead of individual messages - Make it more like the regular mms app view
  *
  */
 
@@ -58,7 +60,6 @@ public class MessageViewsFactory implements RemoteViewsService.RemoteViewsFactor
 	 * will be missing from the listview. getCount() will need to return the most accurate count.
 	 */
 	private int m_count;
-	// Cache the most recent text from the last refresh - this allows us to avoid having to repopulate the entire list
 	
 	
 	/** HACK to get new messages to display immediately without having to hit refresh */
@@ -74,7 +75,7 @@ public class MessageViewsFactory implements RemoteViewsService.RemoteViewsFactor
 	 */
 	public MessageViewsFactory(Context p_context, Intent p_intent)
 	{
-		this.m_context = p_context;	
+		this.m_context = p_context;
 		log("Constructor");
 	}
 	
@@ -150,7 +151,7 @@ public class MessageViewsFactory implements RemoteViewsService.RemoteViewsFactor
 	    // TODO enforce a size limit on the text we display in the widget...25 chars?
 	    rowView.setTextViewText(R.id.row_body, m_smsList.get(p_position).getBody());
 	    // TODO Convert this to a date
-	    rowView.setTextViewText(R.id.row_date, formatTimeStampString(m_smsList.get(p_position).getTime(), false));
+	    rowView.setTextViewText(R.id.row_date, CommonUtils.formatTimeStampString(m_smsList.get(p_position).getTime(), false, m_context));
 
 	    Intent i = new Intent();
 	    Bundle extras = new Bundle();
@@ -220,6 +221,7 @@ public class MessageViewsFactory implements RemoteViewsService.RemoteViewsFactor
 	@Override
 	public void onDestroy()
 	{
+		log(" onDeestroy - Clearing list");
 		m_smsList.clear();
 		m_lastMessageID = -1;
 	}
@@ -232,15 +234,16 @@ public class MessageViewsFactory implements RemoteViewsService.RemoteViewsFactor
 	private void populateList(boolean p_pushFront)
 	{
 		Log.d("MVF", " populating list");
-
+		String[] args = new String [] {Long.toString(m_lastMessageID)};
+		
     	Cursor smsCursor = m_context.getContentResolver().query(
     			Uri.parse("content://sms/inbox"),
     			new String[] {"_id", "thread_id", "address", "person", "date", "body" },
-    			null,
-    			null,
-    			"date DESC");
+    			"_id > ?", // Selection
+    			args, // Selection Args
+    			"date ASC");
     	
-    	m_count = smsCursor.getCount();
+
     	// Loop until we hit the cached message
         while(smsCursor.moveToNext())
         {
@@ -250,94 +253,23 @@ public class MessageViewsFactory implements RemoteViewsService.RemoteViewsFactor
         		Log.d("MVF:"," Found cached ID: " + m_lastMessageID);
         		break; // We already have this message
         	}
-        	//Log.d("MVF","Moving to next: " + Long.toString(smsCursor.getLong(1)));
-        	if(p_pushFront)
-        	{
-        		m_smsList.addFirst( new SmsHolder(smsCursor.getString(5), getContactNameFromNumber(smsCursor.getString(2)), smsCursor.getLong(1), smsCursor.getLong(4)));
-        	}
-        	else
-        	{
-        		m_smsList.add( new SmsHolder(smsCursor.getString(5), getContactNameFromNumber(smsCursor.getString(2)), smsCursor.getLong(1), smsCursor.getLong(4)));
-        	}
+        	//TODO: Use name->column index in place of magic numbers
+            // Add any new recent messages to the front.
+        	m_smsList.addFirst( new SmsHolder(smsCursor.getString(5),
+        			                          CommonUtils.getContactNameFromNumber(smsCursor.getString(2), m_context),
+        			                          smsCursor.getLong(1),
+        			                          smsCursor.getLong(4)));
         }
                
-        // Save the most recent ID.
-    	if(smsCursor.moveToFirst())
+        // Save the most recent ID -> This allows us to only query for new messages.
+    	if(smsCursor.moveToLast())
     	{
     		Log.d("MVF", "caching ID: " + smsCursor.getLong(0));
     		m_lastMessageID = smsCursor.getLong(0);
     	}
     
         smsCursor.close();
+    	m_count = m_smsList.size();
 	}
 
-
-    /**
-     * Obtains a contact display name from a phone number
-     *
-     * @param p_number The target phone number
-     * @return The contact name associated with the supplied number, or the phone number
-     *     if the name could not be retrieved from the contacts.
-     */
-    private String getContactNameFromNumber(String p_number)
-    {
-    	String contact = p_number;
-    	// Resolve Contact
-    	ContentResolver contactResolver = m_context.getContentResolver();
-    	Cursor contactLookupCursor =  
-    			contactResolver.query(
-    	            Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, 
-    	            Uri.encode(p_number)), 
-    	            new String[] {PhoneLookup.DISPLAY_NAME}, 
-    	            null, 
-    	            null, 
-    	            null);
-    	if(contactLookupCursor.moveToFirst())
-    	{
-            Log.d("MVF", ("Found contact for: " + p_number));
-    		contact = contactLookupCursor.getString(0);
-    	}
-    	contactLookupCursor.close();
-    
-    	return contact;
-    }
-
-    /**
-     * Stolen from packages/apps/Mms/src/com/android/mms/messageutils.java
-     * Converts a 'long' date into a timestamp string
-     * 
-     * @param p_timestamp The date from the messsage
-     * @param p_fullFormat True if we should include the full date
-     */
-    public String formatTimeStampString(long p_timestamp, boolean fullFormat) {
-        Time then = new Time();
-        then.set(p_timestamp);
-        Time now = new Time();
-        now.setToNow();
-
-        // Basic settings for formatDateTime() we want for all cases.
-        int format_flags = DateUtils.FORMAT_NO_NOON_MIDNIGHT |
-                           DateUtils.FORMAT_ABBREV_ALL |
-                           DateUtils.FORMAT_CAP_AMPM;
-
-        // If the message is from a different year, show the date and year.
-        if (then.year != now.year) {
-            format_flags |= DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_DATE;
-        } else if (then.yearDay != now.yearDay) {
-            // If it is from a different day than today, show only the date.
-            format_flags |= DateUtils.FORMAT_SHOW_DATE;
-        } else {
-            // Otherwise, if the message is from today, show the time.
-            format_flags |= DateUtils.FORMAT_SHOW_TIME;
-        }
-
-        // If the caller has asked for full details, make sure to show the date
-        // and time no matter what we've determined above (but still make showing
-        // the year only happen if it is a different year from today).
-        if (fullFormat) {
-            format_flags |= (DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME);
-        }
-
-        return DateUtils.formatDateTime(m_context, p_timestamp, format_flags);
-    }
 }
