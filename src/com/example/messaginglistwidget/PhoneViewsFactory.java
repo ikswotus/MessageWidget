@@ -49,8 +49,9 @@ public class PhoneViewsFactory implements RemoteViewsService.RemoteViewsFactory
 	public int getCount()
 	{
 		log(" getCount returning: " + m_callList.size());
+		// Lie - Always report size >= 1. We'll use an empty view if the call list is empty.
 		//TODO: see if size() is O(n) for LinkedLists. We could probably just use a counter updated in populateList();
-		return m_callList.size();
+		return m_callList.size() > 0 ? m_callList.size() : 1;
 	}
 
 	@Override

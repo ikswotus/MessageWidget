@@ -1,6 +1,5 @@
 package com.example.messaginglistwidget;
 
-
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -8,6 +7,10 @@ import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.net.Uri;
@@ -113,6 +116,7 @@ public class MessagingProvider extends AppWidgetProvider
 	                                          R.layout.main_layout);
 	      
 	      widget.setRemoteAdapter(R.id.message_list, p_serviceIntent);
+	      widget.setEmptyView(R.id.message_list,R.layout.empty_row);
 
 	      Intent clickIntent = new Intent(p_context, MessagingProvider.class);
 	      clickIntent.setAction(LIST_CLICK);
@@ -201,6 +205,7 @@ public class MessagingProvider extends AppWidgetProvider
         	log(" onReceive - SMS Tab selected!");
         	m_currentTab = R.id.smsTab;
             updateHelper(p_context, AppWidgetManager.getInstance(p_context), p_intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID));
+            updateTabs(R.id.smsTab, p_context);
 
         }
         else if(p_intent.getAction().equals(PHONE_TAB))
@@ -216,9 +221,34 @@ public class MessagingProvider extends AppWidgetProvider
             // Notify the content has changed?
             AppWidgetManager.getInstance(p_context).notifyAppWidgetViewDataChanged(
             		AppWidgetManager.getInstance(p_context).getAppWidgetIds(new ComponentName(p_context, MessagingProvider.class )), R.id.message_list);  
+            updateTabs(R.id.phoneTab, p_context);
         }
 
         super.onReceive(p_context, p_intent);
+
+	}
+	
+	private static int textWhite = Color.rgb(255, 255, 255);
+	private static int textICSBlue = Color.rgb(0x35, 0xb5, 0xe5);
+	
+	/** TODO: replace this with images. When the tab is selected, use a 'lit' image in place of a dark one
+	 *        until that happens we'll use blueics color to display the currently selected tab.
+	 * @param p_currentTabID
+	 * @param p_context
+	 */
+	private void updateTabs(int p_currentTabID, Context p_context)
+	{
+	    RemoteViews remoteViews = new RemoteViews(p_context.getPackageName(),
+                                                  R.layout.main_layout);
+	    
+	    remoteViews.setTextColor(R.id.smsTab, textWhite);
+    	remoteViews.setTextColor(R.id.phoneTab, textWhite);
+    	// Update the currently selected tab
+    	remoteViews.setTextColor(p_currentTabID, textICSBlue);
+
+    	
+    	// publish changes
+    	AppWidgetManager.getInstance(p_context).updateAppWidget(new ComponentName(p_context, MessagingProvider.class), remoteViews);
 
 	}
 	

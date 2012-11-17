@@ -8,4 +8,5 @@
     android:gravity="left"
     android:paddingLeft="4dip"
     android:textColor="@color/text_white"
+    android:text="@string/empty_message_list"
 />

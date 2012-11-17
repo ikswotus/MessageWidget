@@ -17,29 +17,30 @@ public final class R {
         public static final int text_white=0x7f060000;
     }
     public static final class drawable {
-        public static final int edit_dark=0x7f020000;
-        public static final int ic_launcher=0x7f020001;
-        public static final int ic_mms=0x7f020002;
-        public static final int ic_phone=0x7f020003;
-        public static final int widget_frame=0x7f020004;
+        public static final int cal_widget_bg=0x7f020000;
+        public static final int edit_dark=0x7f020001;
+        public static final int ic_launcher=0x7f020002;
+        public static final int ic_mms=0x7f020003;
+        public static final int ic_phone=0x7f020004;
+        public static final int widget_frame=0x7f020005;
     }
     public static final class id {
         public static final int autoRefreshCB=0x7f080001;
-        public static final int buttonRow=0x7f080009;
+        public static final int buttonRow=0x7f080008;
         public static final int composeButton=0x7f08000b;
         public static final int empty_row_item=0x7f080003;
         public static final int layout=0x7f080000;
-        public static final int message_list=0x7f080008;
+        public static final int message_list=0x7f080007;
         public static final int okButton=0x7f080002;
+        public static final int paddingView=0x7f08000a;
         public static final int phoneTab=0x7f080006;
-        public static final int refreshButton=0x7f08000a;
+        public static final int refreshButton=0x7f080009;
         public static final int row_body=0x7f08000e;
         public static final int row_contact=0x7f08000d;
         public static final int row_date=0x7f08000f;
         public static final int row_item=0x7f08000c;
         public static final int smsTab=0x7f080005;
         public static final int tab_row=0x7f080004;
-        public static final int toggleButton1=0x7f080007;
     }
     public static final class layout {
         public static final int configure=0x7f030000;
@@ -49,10 +50,11 @@ public final class R {
     }
     public static final class string {
         public static final int app_name=0x7f050000;
-        public static final int compose_button=0x7f050002;
+        public static final int compose_button=0x7f050003;
+        public static final int empty_message_list=0x7f050001;
         /**   Button labels 
          */
-        public static final int refresh_button=0x7f050001;
+        public static final int refresh_button=0x7f050002;
     }
     public static final class style {
         public static final int AppTheme=0x7f070000;
