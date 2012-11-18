@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/call_row"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/cal_widget_bg"
+    >
+
+<TextView
+    android:id="@+id/call_row_contact"
+    android:layout_width="wrap_content"
+    android:layout_height="18dip"
+    android:textSize="10sp"
+    android:layout_alignParentTop="true"
+    android:layout_alignParentLeft="true" 
+    android:paddingBottom="4sp"
+    android:gravity="top"
+    android:textColor="@color/text_icsblue"
+/>
+<TextView
+    android:id="@+id/call_row_number"
+    android:layout_width="wrap_content"
+    android:layout_height="18sp"
+    android:textSize="10sp"
+    android:textColor="@color/text_white"
+    android:layout_alignBottom="@id/call_row_contact"
+	android:gravity="bottom"
+    android:layout_alignParentBottom="true"
+	android:layout_alignParentLeft="true"
+    />
+<ImageView
+    android:id="@+id/call_row_details"
+    android:contentDescription="@string/callDescription"
+    android:layout_width="14sp"
+    android:layout_height="14sp"
+    android:layout_alignParentBottom="true"
+    android:layout_toRightOf="@id/call_row_number"
+	android:src="@drawable/incoming_answered"
+	android:scaleType="centerInside"
+    android:paddingLeft="4dip"
+
+    />
+<TextView
+    android:id="@+id/call_row_date"
+    android:layout_width="wrap_content"
+    android:layout_height="18dip" 
+    android:layout_alignParentRight="true"
+    android:layout_alignParentBottom="true"
+    android:textSize="8sp"
+    android:textColor="@color/text_icsblue"
+    />
+</RelativeLayout>

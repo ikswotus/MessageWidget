@@ -7,8 +7,6 @@ import android.net.Uri;
 import android.provider.ContactsContract.PhoneLookup;
 import android.text.format.DateUtils;
 import android.text.format.Time;
-import android.util.Log;
-
 
 /**
  * This class will hold simple functions that can be used in various locations.
@@ -25,7 +23,7 @@ public class CommonUtils
      * @return The contact name associated with the supplied number, or the phone number
      *     if the name could not be retrieved from the contacts.
      */
-    public static String getContactNameFromNumber(String p_number, Context p_context)
+    public static String getContactNameFromNumber(String p_number, Context p_context, boolean p_useNumber)
     {
     	String contact = p_number;
     	// Resolve Contact
@@ -38,12 +36,19 @@ public class CommonUtils
     	            null, 
     	            null, 
     	            null);
+    	boolean found = false;
     	if(contactLookupCursor.moveToFirst())
     	{
     		contact = contactLookupCursor.getString(0);
+    	    found = true;
     	}
     	contactLookupCursor.close();
     
+    	// If we didn't a match and we don't want to default to the number, return an empty string.
+    	if(!found && !p_useNumber)
+    	{
+    		return "";
+    	}
     	return contact;
     }
 

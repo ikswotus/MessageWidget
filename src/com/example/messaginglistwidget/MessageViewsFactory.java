@@ -1,6 +1,5 @@
 package com.example.messaginglistwidget;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 import com.example.util.CommonUtils;
@@ -8,13 +7,9 @@ import com.example.util.SmsHolder;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract.PhoneLookup;
-import android.text.format.DateUtils;
-import android.text.format.Time;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -256,7 +251,7 @@ public class MessageViewsFactory implements RemoteViewsService.RemoteViewsFactor
         	//TODO: Use name->column index in place of magic numbers
             // Add any new recent messages to the front.
         	m_smsList.addFirst( new SmsHolder(smsCursor.getString(5),
-        			                          CommonUtils.getContactNameFromNumber(smsCursor.getString(2), m_context),
+        			                          CommonUtils.getContactNameFromNumber(smsCursor.getString(2), m_context, true),
         			                          smsCursor.getLong(1),
         			                          smsCursor.getLong(4)));
         }

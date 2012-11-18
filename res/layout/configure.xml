@@ -9,13 +9,13 @@
         android:id="@+id/autoRefreshCB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Active Listen:" />
+        android:text="@string/configure_active" />
 
     <Button
         android:id="@+id/okButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="OK" />
+        android:text="@string/ok" />
     
 </LinearLayout> 
 

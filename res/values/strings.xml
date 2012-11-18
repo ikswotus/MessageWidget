@@ -1,12 +1,22 @@
 <resources>
     <string name="app_name">MessagingListWidget</string>
 	<string name="empty_message_list">No messages!</string>	
-    
+    <string name="configure_active">Active Listen: Enable to automatically refresh the display for incoming texts</string>
+	<string name="ok">OK</string>
+	
+	<!--  ImageButton descriptions -->
+	<string name="smsDescription">SMS</string>
+	<string name="phoneDescription">Call log</string>
+	<string name="settingsDescription">Configure Settings</string>
+	<string name="callDescription">Call direction</string>
+	<string name="refreshDescription">Refresh!</string>
+	<string name="composeDescription">Start new</string>
+	
     <!--  Colors to use in styles -->
     <color name="text_white">#FFFFFFFF</color>
     <color name="text_icsblue">#33B5E5</color>
     
-    <!--  Button labels -->
+    <!--  Button labels (UNUSED) -->
     <string name="refresh_button">Refresh</string>
     <string name="compose_button">Compose</string>
 

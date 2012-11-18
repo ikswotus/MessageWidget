@@ -7,10 +7,6 @@ import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.text.SpannableString;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.net.Uri;
@@ -62,6 +58,9 @@ public class MessagingProvider extends AppWidgetProvider
 	/** Action for when the compose button is pressed */
 	private static final String ACTION_COMPOSE = "ACTION_COMPOSE";
 
+	/** Action to launch settings activity */
+	private static final String CONFIGURE_SETTINGS = "CONFIGURE_SETTINGS";
+	
 	/** Action for when the SMS tab is selected */
 	private static final String SMS_TAB = "SMS_TAB";
 	
@@ -80,8 +79,8 @@ public class MessagingProvider extends AppWidgetProvider
 		 Log.d(TAG, p_message);
 	 }
 	
-	 /** Tracks which tab is currently active */
-	 private int m_currentTab;
+	 /** Tracks which tab is currently active TODO: Dont think this should be static...but it gets reset between calls????*/
+	 private static int m_currentTab;
 	
 	/**
 	 * Called from the ConfigurationActivity to perform initial setup once the user has confirmed the options.
@@ -148,6 +147,12 @@ public class MessagingProvider extends AppWidgetProvider
 
 	      PendingIntent pendingPhone = PendingIntent.getBroadcast(p_context, p_widgetID, phoneIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 	      widget.setOnClickPendingIntent(R.id.phoneTab, pendingPhone);
+
+	      Intent settingsIntent = new Intent(p_context, MessagingProvider.class);
+	      settingsIntent.setAction(CONFIGURE_SETTINGS);
+	      PendingIntent pendingSettings = PendingIntent.getBroadcast(p_context, p_widgetID, settingsIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+	      widget.setOnClickPendingIntent(R.id.settingsButton, pendingSettings);
+	      
 	      
 	      p_manager.updateAppWidget(p_widgetID, widget);
 	}
@@ -183,7 +188,18 @@ public class MessagingProvider extends AppWidgetProvider
         else if(p_intent.getAction().equals(ACTION_COMPOSE))
         {
         	// Start generic compose activity - no specific thread
-        	startMessagingActivity(p_context);
+        	if(m_currentTab == R.id.smsTab)
+        	{
+        		startMessagingActivity(p_context);
+        	}
+        	else if(m_currentTab == R.id.phoneTab)
+        	{
+        		startPhoneActivity(p_context);
+        	}
+        	else
+        	{
+        		log(" currentTab = " + m_currentTab);
+        	}
         }
         else if(p_intent.getAction().equals(ACTION_REFRESH))
         {
@@ -204,6 +220,7 @@ public class MessagingProvider extends AppWidgetProvider
         	// for now just log a message
         	log(" onReceive - SMS Tab selected!");
         	m_currentTab = R.id.smsTab;
+        	log("set current tab = " + m_currentTab);
             updateHelper(p_context, AppWidgetManager.getInstance(p_context), p_intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID));
             updateTabs(R.id.smsTab, p_context);
 
@@ -223,13 +240,14 @@ public class MessagingProvider extends AppWidgetProvider
             		AppWidgetManager.getInstance(p_context).getAppWidgetIds(new ComponentName(p_context, MessagingProvider.class )), R.id.message_list);  
             updateTabs(R.id.phoneTab, p_context);
         }
-
+        else if(p_intent.getAction().equals(CONFIGURE_SETTINGS))
+        {
+        	log(" onRecieve - Settings activity launching");
+        	// TODO: reopen configuration activity  (or launch a new activity designed to dynamically change settings)
+        }
         super.onReceive(p_context, p_intent);
 
 	}
-	
-	private static int textWhite = Color.rgb(255, 255, 255);
-	private static int textICSBlue = Color.rgb(0x35, 0xb5, 0xe5);
 	
 	/** TODO: replace this with images. When the tab is selected, use a 'lit' image in place of a dark one
 	 *        until that happens we'll use blueics color to display the currently selected tab.
@@ -241,11 +259,20 @@ public class MessagingProvider extends AppWidgetProvider
 	    RemoteViews remoteViews = new RemoteViews(p_context.getPackageName(),
                                                   R.layout.main_layout);
 	    
-	    remoteViews.setTextColor(R.id.smsTab, textWhite);
-    	remoteViews.setTextColor(R.id.phoneTab, textWhite);
-    	// Update the currently selected tab
-    	remoteViews.setTextColor(p_currentTabID, textICSBlue);
+    	remoteViews.setImageViewResource(R.id.phoneTab, R.drawable.phone_white);
+    	remoteViews.setImageViewResource(R.id.smsTab, R.drawable.sms_white);
 
+    	switch(p_currentTabID)
+    	{
+    	case R.id.smsTab:
+    		remoteViews.setImageViewResource(R.id.smsTab, R.drawable.sms_blue);
+    		break;
+    	case R.id.phoneTab:
+    		remoteViews.setImageViewResource(R.id.phoneTab, R.drawable.phone_blue);
+    		break;
+    	default: //TODO add other tabs as needed - remember to reset them all to white too
+    			
+    	}
     	
     	// publish changes
     	AppWidgetManager.getInstance(p_context).updateAppWidget(new ComponentName(p_context, MessagingProvider.class), remoteViews);
@@ -264,6 +291,7 @@ public class MessagingProvider extends AppWidgetProvider
 		newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		newIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 		newIntent.setClassName("com.android.mms", "com.android.mms.ui.ComposeMessageActivity");
+		newIntent.setData(ContentUris.withAppendedId(Uri.parse("content://mms-sms/conversations"), 0));
         p_context.startActivity(newIntent);	
 	}
 	
@@ -284,6 +312,16 @@ public class MessagingProvider extends AppWidgetProvider
 		newIntent.setData(ContentUris.withAppendedId(Uri.parse("content://mms-sms/conversations"), p_threadID));
         p_context.startActivity(newIntent);	
 	}
+	
+	private void startPhoneActivity(Context p_context)
+	{
+		// Pretty simple - no additional info to append here
+    	Intent intent = new Intent(Intent.ACTION_DIAL);
+    	intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+		p_context.startActivity(intent);
+	}
+	
 	
 	/**
 	 * Opens a details page for a call.

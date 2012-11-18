@@ -3,45 +3,55 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layout_margin="2dip"
     android:background="@drawable/cal_widget_bg"
     android:orientation="vertical" >
     
     <!--  Top row contains the various tabs (Which will be implemented slowly...) The listview (and likely the buttons) will need to change to reflect the currently selected tab -->
-    <LinearLayout
-        android:id="@+id/tab_row"
-        android:layout_width="fill_parent"
-        android:layout_height="30sp"
-        android:layout_margin="2dip"
-        android:orientation="horizontal"
-        >
-	<!--  TODO: Counters will need relative layouts?
-				Replace the buttons with clickable images
-	-->
-    <Button 
-        android:id="@+id/smsTab"
-        android:layout_width="50sp"
-        android:layout_height="match_parent"
-        android:text="SMS"
-        android:textSize="10dip"
-        android:textColor="@color/text_white"
-        style="?android:attr/borderlessButtonStyle" />
-    <Button
-        android:id="@+id/phoneTab"
-        android:layout_width="50sp"
-        android:layout_height="match_parent"
-        android:text="PHO"
-        android:textSize="10dip"
-        android:textColor="@color/text_white"
-        style="?android:attr/borderlessButtonStyle" />
+	<RelativeLayout
+	    android:id="@+id/tab_row_layout"
+	    android:layout_width="fill_parent"
+	    android:layout_height="32sp"
+	    >
+    	<ImageButton 
+    	    android:id="@+id/smsTab"
+    	    android:contentDescription="@string/smsDescription"
+    	    android:layout_width="32sp"
+   	        android:layout_height="32sp"
+  	        android:layout_alignParentLeft="true"
+		    android:drawablePadding="0dip"
+		    android:src="@drawable/sms_white"
+		    android:scaleType="centerInside"
+       	    style="?android:attr/borderlessButtonStyle" />
+    	<ImageButton
+        	android:id="@+id/phoneTab"
+        	android:contentDescription="@string/phoneDescription"
+        	android:layout_width="32sp"
+        	android:layout_height="32sp"
+        	android:layout_toRightOf="@id/smsTab"
+		    android:drawablePadding="0dip"
+		    android:src="@drawable/phone_white"
+		    android:scaleType="centerInside"
+        	style="?android:attr/borderlessButtonStyle" />
 
-    </LinearLayout>
+   		<ImageButton
+	    	android:id="@+id/settingsButton"
+	    	android:contentDescription="@string/settingsDescription"
+	    	android:layout_width="32sp"
+	    	android:layout_height="32sp"
+		    android:drawablePadding="0dip"
+		    android:layout_alignParentRight="true"
+		    android:src="@drawable/button_selector"
+			android:scaleType="centerInside"
+	    	style="?android:attr/borderlessButtonStyle"
+	    	 />
+    	</RelativeLayout>
     
     <ListView xmlns:android="http://schemas.android.com/apk/res/android"
   			  android:id="@+id/message_list"
  		      android:layout_width="match_parent"
-              android:layout_height="200sp"
+              android:layout_height="120sp"
               android:layout_marginLeft="3dp"
               
 			  android:background="@drawable/cal_widget_bg"
@@ -56,31 +66,33 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
-        <Button
+        <ImageButton
             android:id="@+id/refreshButton"
-            android:layout_width="wrap_content"
-            android:layout_height="30sp"
-            android:text="@string/refresh_button"
-            android:textSize="10sp"
-            android:textColor="@color/text_white"
+            android:layout_width="32sp"
+            android:layout_height="32sp"
             android:gravity="left"
             android:layout_weight="0"
-            style="?android:attr/borderlessButtonStyle"
+			android:contentDescription="@string/refreshDescription"
+			android:scaleType="centerInside"
+			android:src="@drawable/refresh"
+            style="?android:attr/borderlessButtonStyle"			
         />
 		<TextView 
 		    android:id="@+id/paddingView"
 		    android:layout_weight="1"
 		    android:layout_height="30sp"
-		    android:layout_width="fill_parent"/>
-        <Button
+		    android:layout_width="fill_parent"
+		/>
+        <ImageButton
             android:id="@+id/composeButton"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="30sp"
+            android:layout_width="32sp"
+            android:layout_height="32sp"
             android:gravity="right"
-            android:text="@string/compose_button"
-            android:textColor="@color/text_white"
-            android:textSize="10sp" />
+            android:contentDescription="@string/composeDescription"
+            android:scaleType="centerInside"
+            android:src="@drawable/message_compose"
+            style="?android:attr/borderlessButtonStyle"			
+ 		/>
         
     </LinearLayout>
 

@@ -17,44 +17,69 @@ public final class R {
         public static final int text_white=0x7f060000;
     }
     public static final class drawable {
-        public static final int cal_widget_bg=0x7f020000;
-        public static final int edit_dark=0x7f020001;
-        public static final int ic_launcher=0x7f020002;
-        public static final int ic_mms=0x7f020003;
-        public static final int ic_phone=0x7f020004;
-        public static final int widget_frame=0x7f020005;
+        public static final int button_selector=0x7f020000;
+        public static final int cal_widget_bg=0x7f020001;
+        public static final int edit_dark=0x7f020002;
+        public static final int ic_launcher=0x7f020003;
+        public static final int incoming_answered=0x7f020004;
+        public static final int incoming_missed=0x7f020005;
+        public static final int message_compose=0x7f020006;
+        public static final int outgoing=0x7f020007;
+        public static final int phone_blue=0x7f020008;
+        public static final int phone_white=0x7f020009;
+        public static final int refresh=0x7f02000a;
+        public static final int small_settings=0x7f02000b;
+        public static final int sms_blue=0x7f02000c;
+        public static final int sms_white=0x7f02000d;
     }
     public static final class id {
-        public static final int autoRefreshCB=0x7f080001;
-        public static final int buttonRow=0x7f080008;
-        public static final int composeButton=0x7f08000b;
-        public static final int empty_row_item=0x7f080003;
-        public static final int layout=0x7f080000;
-        public static final int message_list=0x7f080007;
-        public static final int okButton=0x7f080002;
-        public static final int paddingView=0x7f08000a;
-        public static final int phoneTab=0x7f080006;
-        public static final int refreshButton=0x7f080009;
-        public static final int row_body=0x7f08000e;
-        public static final int row_contact=0x7f08000d;
-        public static final int row_date=0x7f08000f;
-        public static final int row_item=0x7f08000c;
-        public static final int smsTab=0x7f080005;
-        public static final int tab_row=0x7f080004;
+        public static final int autoRefreshCB=0x7f080006;
+        public static final int buttonRow=0x7f08000e;
+        public static final int call_row=0x7f080000;
+        public static final int call_row_contact=0x7f080001;
+        public static final int call_row_date=0x7f080004;
+        public static final int call_row_details=0x7f080003;
+        public static final int call_row_number=0x7f080002;
+        public static final int composeButton=0x7f080011;
+        public static final int empty_row_item=0x7f080008;
+        public static final int layout=0x7f080005;
+        public static final int message_list=0x7f08000d;
+        public static final int okButton=0x7f080007;
+        public static final int paddingView=0x7f080010;
+        public static final int phoneTab=0x7f08000b;
+        public static final int refreshButton=0x7f08000f;
+        public static final int row_body=0x7f080014;
+        public static final int row_contact=0x7f080013;
+        public static final int row_date=0x7f080015;
+        public static final int row_item=0x7f080012;
+        public static final int settingsButton=0x7f08000c;
+        public static final int smsTab=0x7f08000a;
+        public static final int tab_row_layout=0x7f080009;
     }
     public static final class layout {
-        public static final int configure=0x7f030000;
-        public static final int empty_row=0x7f030001;
-        public static final int main_layout=0x7f030002;
-        public static final int row=0x7f030003;
+        public static final int call_item_row=0x7f030000;
+        public static final int configure=0x7f030001;
+        public static final int empty_row=0x7f030002;
+        public static final int main_layout=0x7f030003;
+        public static final int row=0x7f030004;
     }
     public static final class string {
         public static final int app_name=0x7f050000;
-        public static final int compose_button=0x7f050003;
+        public static final int callDescription=0x7f050007;
+        public static final int composeDescription=0x7f050009;
+        public static final int compose_button=0x7f05000b;
+        public static final int configure_active=0x7f050002;
         public static final int empty_message_list=0x7f050001;
-        /**   Button labels 
+        public static final int ok=0x7f050003;
+        public static final int phoneDescription=0x7f050005;
+        public static final int refreshDescription=0x7f050008;
+        /**   Button labels (UNUSED) 
          */
-        public static final int refresh_button=0x7f050002;
+        public static final int refresh_button=0x7f05000a;
+        public static final int settingsDescription=0x7f050006;
+        /**   ImageButton descriptions 
+         */
+        public static final int smsDescription=0x7f050004;
     }
     public static final class style {
         public static final int AppTheme=0x7f070000;

@@ -2,7 +2,6 @@ package com.example.messaginglistwidget;
 
 import android.content.Intent;
 import android.widget.RemoteViewsService;
-import android.widget.RemoteViewsService.RemoteViewsFactory;
 
 public class PhoneService extends RemoteViewsService
 {
