@@ -14,6 +14,12 @@ import android.os.Bundle;
 
 /**
  * TODO:
+ * 
+ * 		 THIS CLASS CANNOT STORE STATE!
+ * 			TODO: Map widgetID to variables if we want to track state. This provider class is created/destroyed whenever 
+ * 				onReceive/onUpdate are called.
+ * 
+ * 
  * 		 Dynamically register/unregister the receiver for incoming text messages based on the configuration option? Is that allowed for widgets?
  * 
  * 		 More config options? Max number of texts? 

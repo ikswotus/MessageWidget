@@ -91,4 +91,10 @@ public class CommonUtils
 
         return DateUtils.formatDateTime(p_context, p_timestamp, format_flags);
     }
+    
+    /**
+     * Private constructor - this class will only have static functions and
+     * won't need to be instantiated(at least that's the current plan...)
+     */
+    private CommonUtils(){}
 }
