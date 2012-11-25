@@ -34,7 +34,35 @@
 		    android:src="@drawable/phone_white"
 		    android:scaleType="centerInside"
         	style="?android:attr/borderlessButtonStyle" />
+		<Button
+		    android:id="@+id/webTab"
+		    android:text="@string/webTabText"
+		    android:textSize="10sp"
+		    android:layout_width="32sp"
+		    android:layout_height="32sp"
+		    android:layout_toRightOf="@id/phoneTab"
+		    android:textColor="@color/text_white"
+		    style="?android:attr/borderlessButtonStyle" />
+		<Button
+		    android:id="@+id/emailTab"
+		    android:text="@string/emailTabText"
+		    android:textSize="10sp"
+		    android:layout_width="32sp"
+		    android:layout_height="32sp"
+		    android:layout_toRightOf="@id/webTab"
+		    android:textColor="@color/text_white"
+		    style="?android:attr/borderlessButtonStyle" />
 
+		<Button
+		    android:id="@+id/notesTab"
+		    android:text="@string/notesTabText"
+		    android:textSize="10sp"
+		    android:textColor="@color/text_white"
+		    android:layout_width="32sp"
+		    android:layout_height="32sp"
+		    android:layout_toRightOf="@id/emailTab"
+		    style="?android:attr/borderlessButtonStyle" />
+				
    		<ImageButton
 	    	android:id="@+id/settingsButton"
 	    	android:contentDescription="@string/settingsDescription"

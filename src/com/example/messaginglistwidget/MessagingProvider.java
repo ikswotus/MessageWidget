@@ -1,5 +1,7 @@
 package com.example.messaginglistwidget;
 
+import com.example.messaginglistwidget.WebsiteListActivity;
+
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -47,12 +49,20 @@ public class MessagingProvider extends AppWidgetProvider
 	/** Provides the PhoneViewsFactory with an ID to store the call_id in so we can access it here */
 	public static final String PHONE_CALL_ID = "PHONE_CALL_ID";
 	
+	/** Really just the url...ID added for consistency */
+	public static final String WEBSITE_URL_ID = "WEBSITE_URL_ID";
+
+	public static final String NOTES_ID = "NOTES_ID";
+	
+	public static final String WEBSITE_NAME = "WEBSITE_NAME";
+	
 	/** Sent with a ListClick event - Will identify the type of action */
 	public enum ItemType
 	{
 		sms,
 		call,
-		email
+		email,
+		web
 	}
 	
 	/** Action for when a list item is pressed */
@@ -72,6 +82,15 @@ public class MessagingProvider extends AppWidgetProvider
 	
 	/** Action for when the PHONE tab is selected */
 	private static final String PHONE_TAB = "PHONE_TAB";
+	
+	/** Action for when the WEB tab is selected */
+	private static final String WEB_TAB = "WEB_TAB";
+	
+	/** Email support */
+	private static final String EMAIL_TAB = "EMAIL_TAB";
+	
+	/** Notes */
+	private static final String NOTES_TAB = "NOTES_TAB";
 	
 	/** Configuration flag - If set to true, we notify MessageViewsFactory when SMS_RECEIVED occurs so it automatically updates the listview */
 	private static boolean m_activeListen = false;
@@ -146,19 +165,40 @@ public class MessagingProvider extends AppWidgetProvider
 
 	      PendingIntent pendingSms = PendingIntent.getBroadcast(p_context, p_widgetID, smsIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 	      widget.setOnClickPendingIntent(R.id.smsTab, pendingSms);
-	      
+
+	      // Phone tab
 	      Intent phoneIntent = new Intent(p_context, MessagingProvider.class);
 	      phoneIntent.setAction(PHONE_TAB);
 	      phoneIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_widgetID);
-
 	      PendingIntent pendingPhone = PendingIntent.getBroadcast(p_context, p_widgetID, phoneIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 	      widget.setOnClickPendingIntent(R.id.phoneTab, pendingPhone);
+	      
+	      // Web tab
+	      Intent webIntent = new Intent(p_context, MessagingProvider.class);
+	      webIntent.setAction(WEB_TAB);
+	      webIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_widgetID);
+	      PendingIntent pendingWeb = PendingIntent.getBroadcast(p_context, p_widgetID, webIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+	      widget.setOnClickPendingIntent(R.id.webTab, pendingWeb);
 
+	      // Email tab
+	      Intent emailIntent = new Intent(p_context, MessagingProvider.class);
+	      emailIntent.setAction(EMAIL_TAB);
+	      emailIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_widgetID);
+	      PendingIntent pendingEmail = PendingIntent.getBroadcast(p_context, p_widgetID, emailIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+	      widget.setOnClickPendingIntent(R.id.emailTab, pendingEmail);
+	      
+	      // Notes tab
+	      Intent notesIntent = new Intent(p_context, MessagingProvider.class);
+	      notesIntent.setAction(NOTES_TAB);
+	      notesIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_widgetID);// TODO- what is this used for?
+	      PendingIntent pendingNotes = PendingIntent.getBroadcast(p_context, p_widgetID, notesIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+	      widget.setOnClickPendingIntent(R.id.notesTab, pendingNotes);
+	      
+	      // Configure button
 	      Intent settingsIntent = new Intent(p_context, MessagingProvider.class);
 	      settingsIntent.setAction(CONFIGURE_SETTINGS);
 	      PendingIntent pendingSettings = PendingIntent.getBroadcast(p_context, p_widgetID, settingsIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 	      widget.setOnClickPendingIntent(R.id.settingsButton, pendingSettings);
-	      
 	      
 	      p_manager.updateAppWidget(p_widgetID, widget);
 	}
@@ -177,14 +217,24 @@ public class MessagingProvider extends AppWidgetProvider
 	{
 		log(" onReceive E");
 
+		//TODO Refactor this to look for an enum in the bundle and switch on it for proper view behavior
         if(p_intent.getAction().equals(LIST_CLICK))
         {
         	Bundle bun = p_intent.getExtras();
         	// Pass the thread ID to the messaging activity
         	if(bun.getLong(SMS_THREAD_ID) == 0)
         	{
-        		// Should have PHONE_THREAD_ID
-        		startCallLogActivity(p_context, bun.getLong(PHONE_CALL_ID));
+        		if(bun.getLong(PHONE_CALL_ID) == 0)
+        		{
+        			// Should have WEBSITE_URL_ID
+        			log(" WEB_ID [" + bun.getString(WEBSITE_URL_ID) + "]");
+        			startWebActivity(p_context, bun.getString(WEBSITE_URL_ID));
+        		}
+        		else
+        		{
+        			// Should have PHONE_THREAD_ID
+        			startCallLogActivity(p_context, bun.getLong(PHONE_CALL_ID));
+        		}
         	}
         	else
         	{
@@ -201,6 +251,25 @@ public class MessagingProvider extends AppWidgetProvider
         	else if(m_currentTab == R.id.phoneTab)
         	{
         		startPhoneActivity(p_context);
+        	}
+        	else if (m_currentTab == R.id.webTab)
+        	{
+        		//TODO Start web list activity
+        		log(" TODO Start web list editor!");
+        		Intent newWeb = new Intent(p_context, WebsiteListActivity.class);
+        		newWeb.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        		p_context.startActivity(newWeb);
+        		notifyManager(p_context);// todo? Does this work???
+        	}
+        	else if(m_currentTab == R.id.emailTab)
+        	{
+        		// TODO launch email
+        		log(" TODO: Start email composition");
+        	}
+        	else if(m_currentTab == R.id.notesTab)
+        	{
+        		// Launch notes
+        		log(" TODO Start notes activity!");
         	}
         	else
         	{
@@ -246,12 +315,66 @@ public class MessagingProvider extends AppWidgetProvider
             		AppWidgetManager.getInstance(p_context).getAppWidgetIds(new ComponentName(p_context, MessagingProvider.class )), R.id.message_list);  
             updateTabs(R.id.phoneTab, p_context);
         }
+        else if(p_intent.getAction().equals(WEB_TAB))
+        {
+        	// Update web view
+        	log(" onReceive() - WEB Tab selected! ");
+        	m_currentTab = R.id.webTab;
+        	Intent serviceIntent = new Intent(p_context, WebViewsService.class);
+            serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID));
+            serviceIntent.setData(Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME)));
+
+            updateHelper(p_context, AppWidgetManager.getInstance(p_context), p_intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID), serviceIntent);
+            // Notify the content has changed?
+            AppWidgetManager.getInstance(p_context).notifyAppWidgetViewDataChanged(
+            		AppWidgetManager.getInstance(p_context).getAppWidgetIds(new ComponentName(p_context, MessagingProvider.class )), R.id.message_list);  
+            // Currently does nothing - Add Web image
+            updateTabs(R.id.webTab, p_context);
+        }
+        else if(p_intent.getAction().equals(EMAIL_TAB))
+        {
+        	log(" onReceive() - EML tab selected");
+        	m_currentTab = R.id.emailTab;
+        	Intent serviceIntent = new Intent(p_context, EmailService.class);
+            serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID));
+            serviceIntent.setData(Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME)));
+
+            updateHelper(p_context, AppWidgetManager.getInstance(p_context), p_intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID), serviceIntent);
+            // Notify the content has changed?
+            AppWidgetManager.getInstance(p_context).notifyAppWidgetViewDataChanged(
+            		AppWidgetManager.getInstance(p_context).getAppWidgetIds(new ComponentName(p_context, MessagingProvider.class )), R.id.message_list);  
+            // Currently does nothing - Add Web image
+            updateTabs(R.id.emailTab, p_context);
+        }
+        else if(p_intent.getAction().equals(NOTES_TAB))
+        {
+        	log(" onReceive() - NOTES tab selected");
+        	m_currentTab = R.id.notesTab;
+        	Intent serviceIntent = new Intent(p_context, NotesService.class);
+            serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID));
+            serviceIntent.setData(Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME)));
+
+            updateHelper(p_context, AppWidgetManager.getInstance(p_context), p_intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID), serviceIntent);
+            // Notify the content has changed?
+            AppWidgetManager.getInstance(p_context).notifyAppWidgetViewDataChanged(
+            		AppWidgetManager.getInstance(p_context).getAppWidgetIds(new ComponentName(p_context, MessagingProvider.class )), R.id.message_list);  
+            // Currently does nothing - Add Web image
+            updateTabs(R.id.notesTab, p_context);
+        }
         else if(p_intent.getAction().equals(CONFIGURE_SETTINGS))
         {
         	log(" onRecieve - Settings activity launching");
         	// TODO: reopen configuration activity  (or launch a new activity designed to dynamically change settings)
         }
         super.onReceive(p_context, p_intent);
+
+	}
+
+	private void notifyManager(Context p_context)
+	{
+    	AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(p_context);
+   	 	appWidgetManager.notifyAppWidgetViewDataChanged(
+   	 			appWidgetManager.getAppWidgetIds(new ComponentName(p_context, MessagingProvider.class )), R.id.message_list);       	
 
 	}
 	
@@ -267,7 +390,7 @@ public class MessagingProvider extends AppWidgetProvider
 	    
     	remoteViews.setImageViewResource(R.id.phoneTab, R.drawable.phone_white);
     	remoteViews.setImageViewResource(R.id.smsTab, R.drawable.sms_white);
-
+    	
     	switch(p_currentTabID)
     	{
     	case R.id.smsTab:
@@ -276,6 +399,7 @@ public class MessagingProvider extends AppWidgetProvider
     	case R.id.phoneTab:
     		remoteViews.setImageViewResource(R.id.phoneTab, R.drawable.phone_blue);
     		break;
+    	
     	default: //TODO add other tabs as needed - remember to reset them all to white too
     			
     	}
@@ -299,6 +423,14 @@ public class MessagingProvider extends AppWidgetProvider
 		newIntent.setClassName("com.android.mms", "com.android.mms.ui.ComposeMessageActivity");
 		newIntent.setData(ContentUris.withAppendedId(Uri.parse("content://mms-sms/conversations"), 0));
         p_context.startActivity(newIntent);	
+	}
+	
+	private void startWebActivity(Context p_context, String p_url)
+	{
+        Intent webIntent = new Intent( Intent.ACTION_VIEW );
+        webIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        webIntent.setData(Uri.parse("http://" + p_url));
+        p_context.startActivity(webIntent);
 	}
 	
 	/**

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/web_row"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/cal_widget_bg"
+    >
+	<TextView
+    	android:id="@+id/web_row_name"
+   	 	android:layout_width="wrap_content"
+    	android:layout_height="18dip" 
+    	android:layout_alignParentLeft="true"
+    	android:textSize="10sp"
+    	android:textColor="@color/text_icsblue"
+    />
+</RelativeLayout>

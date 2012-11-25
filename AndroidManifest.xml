@@ -36,13 +36,22 @@
              android:permission="android.permission.BIND_REMOTEVIEWS" />
     <service android:name="PhoneService"
              android:permission="android.permission.BIND_REMOTEVIEWS" />
+    <service android:name="WebViewsService"
+             android:permission="android.permission.BIND_REMOTEVIEWS" />
+ 	<service android:name="EmailService"
+ 	    	 android:permission="android.permission.BIND_REMOTEVIEWS" />
+ 	<service android:name="NotesService"
+ 	    	 android:permission="android.permission.BIND_REMOTEVIEWS" />
+ 	
     <!--  Our configuration activity -->
     <activity android:name=".MessagingConfigureActivity">
     	<intent-filter>
        	 	<action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
     	</intent-filter>
+	
 	</activity>
     
+    <activity android:name=".WebsiteListActivity" />
     </application>
 
 </manifest>
