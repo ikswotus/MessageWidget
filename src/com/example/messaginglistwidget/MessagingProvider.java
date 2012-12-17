@@ -1,6 +1,11 @@
 package com.example.messaginglistwidget;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import com.example.messaginglistwidget.WebsiteListActivity;
+import com.example.util.SystemProfile;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -9,9 +14,13 @@ import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 /**
@@ -52,9 +61,14 @@ public class MessagingProvider extends AppWidgetProvider
 	/** Really just the url...ID added for consistency */
 	public static final String WEBSITE_URL_ID = "WEBSITE_URL_ID";
 
+	/** used to store profiles */
+	public static final String PROFILE_ID = "PROFILE_ID";
+	
 	public static final String NOTES_ID = "NOTES_ID";
 	
 	public static final String WEBSITE_NAME = "WEBSITE_NAME";
+
+	public static final String LIST_CLICK_TYPE = "LIST_CLICK_TYPE";
 	
 	/** Sent with a ListClick event - Will identify the type of action */
 	public enum ItemType
@@ -62,8 +76,18 @@ public class MessagingProvider extends AppWidgetProvider
 		sms,
 		call,
 		email,
-		web
+		web,
+		profile,
+		note
 	}
+	
+	//LIST TYPES
+	public static final int k_sms = 1;
+	public static final int k_phone = 2;
+	public static final int k_email = 3;
+	public static final int k_web = 4;
+	public static final int k_profile = 5;
+	public static final int k_note = 6;
 	
 	/** Action for when a list item is pressed */
 	private static final String LIST_CLICK = "LIST_CLICK";
@@ -91,6 +115,9 @@ public class MessagingProvider extends AppWidgetProvider
 	
 	/** Notes */
 	private static final String NOTES_TAB = "NOTES_TAB";
+
+	/** Profiles */
+	private static final String PROFILE_TAB = "PROFILE_TAB";
 	
 	/** Configuration flag - If set to true, we notify MessageViewsFactory when SMS_RECEIVED occurs so it automatically updates the listview */
 	private static boolean m_activeListen = false;
@@ -194,6 +221,13 @@ public class MessagingProvider extends AppWidgetProvider
 	      PendingIntent pendingNotes = PendingIntent.getBroadcast(p_context, p_widgetID, notesIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 	      widget.setOnClickPendingIntent(R.id.notesTab, pendingNotes);
 	      
+	      // Profile Tab
+	      Intent profileIntent = new Intent(p_context, MessagingProvider.class);
+	      profileIntent.setAction(PROFILE_TAB);
+	      profileIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_widgetID);
+	      PendingIntent pendingProfile = PendingIntent.getBroadcast(p_context, p_widgetID, profileIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+	      widget.setOnClickPendingIntent(R.id.profileTab, pendingProfile);
+	      
 	      // Configure button
 	      Intent settingsIntent = new Intent(p_context, MessagingProvider.class);
 	      settingsIntent.setAction(CONFIGURE_SETTINGS);
@@ -212,34 +246,127 @@ public class MessagingProvider extends AppWidgetProvider
 	      updateHelper(p_context, p_manager, p_widgetID, svcIntent);
 	}
 	
+	private void setDataConnection(Context p_context, boolean p_dataEnabled)
+	{
+		try
+		{
+			final ConnectivityManager conman = (ConnectivityManager) p_context.getSystemService(Context.CONNECTIVITY_SERVICE);
+			final Class<?> conmanClass = Class.forName(conman.getClass().getName());
+			final Field iConnectivityManagerField = conmanClass.getDeclaredField("mService");
+			iConnectivityManagerField.setAccessible(true);
+			final Object iConnectivityManager = iConnectivityManagerField.get(conman);
+			final Class<?> iConnectivityManagerClass = Class.forName(iConnectivityManager.getClass().getName());
+			final Method setMobileDataEnabledMethod = iConnectivityManagerClass.getDeclaredMethod("setMobileDataEnabled", Boolean.TYPE);
+			setMobileDataEnabledMethod.setAccessible(true);
+			setMobileDataEnabledMethod.invoke(iConnectivityManager, p_dataEnabled);
+		}
+		catch (NoSuchFieldException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		}
+		catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		}
+		catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void updateProfile(Context p_context, long p_profileID)
+	{
+		log(" updateProfile E : " + p_profileID);
+
+		// Do profile stuff!
+		SystemProfile newProfile = ProfileViewsFactory.getProfile((int) p_profileID);
+		
+		// 3G is complicated....
+		setDataConnection(p_context, newProfile.isDataEnabled());
+
+		//enable/disable wifi
+    	WifiManager wifiManager = (WifiManager)p_context.getSystemService(Context.WIFI_SERVICE);
+	    wifiManager.setWifiEnabled(newProfile.isWifiEnabled());
+
+	    // Ringer
+	    final AudioManager audioManager = (AudioManager) p_context.getSystemService(Context.AUDIO_SERVICE);
+	    if(newProfile.getVolume() == SystemProfile.VolumeSetting.vibrate)
+	    {
+	    	log(" RINGER set to vibrate");
+	    	audioManager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
+	    }
+	    else if(newProfile.getVolume() == SystemProfile.VolumeSetting.silent)
+	    {
+	    	log(" RINGER set to silent");
+	    	audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+	    }
+	    else //loud
+	    {
+	    	log(" RINGER set to loud");
+	    	audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+	    }
+	}
+	
+	
+	private void handleListClick(Intent p_intent, Context p_context)
+	{
+    	Bundle bun = p_intent.getExtras();
+    	int type = bun.getInt(LIST_CLICK_TYPE);
+    	
+    	switch(type)
+    	{
+    	case k_sms:
+    		if(bun.getLong(SMS_THREAD_ID) != 0)
+    		{
+    			startMessagingThreadActivity(p_context, bun.getLong(SMS_THREAD_ID));
+    			return;
+    		}
+    		break;
+    	case k_phone:
+    		if(bun.getLong(PHONE_CALL_ID) != 0)
+    		{
+    			startCallLogActivity(p_context, bun.getLong(PHONE_CALL_ID));
+    			return;
+    		}
+    		break;
+    	case k_web:
+    		if(bun.getString(WEBSITE_URL_ID) != null)
+    		{
+    			startWebActivity(p_context, bun.getString(WEBSITE_URL_ID));
+    			return;
+    		}
+    		break;
+    	case k_profile:
+    		log(" k_profile = looking for ID");
+  			// Do profile stuff
+   			updateProfile(p_context, bun.getLong(PROFILE_ID));
+   			return;
+
+    	case k_note:
+    		//do note stuff
+    	
+    	
+    	}
+    	// if we didn't return the bundle was missing somethign!
+    	log(" Error: Bundle missing ID for action: " + type);
+	}
+	
 	@Override
 	public void onReceive(Context p_context, Intent p_intent)
 	{
 		log(" onReceive E");
 
 		//TODO Refactor this to look for an enum in the bundle and switch on it for proper view behavior
-        if(p_intent.getAction().equals(LIST_CLICK))
+        // TODO: Handle in separate function
+		if(p_intent.getAction().equals(LIST_CLICK))
         {
-        	Bundle bun = p_intent.getExtras();
-        	// Pass the thread ID to the messaging activity
-        	if(bun.getLong(SMS_THREAD_ID) == 0)
-        	{
-        		if(bun.getLong(PHONE_CALL_ID) == 0)
-        		{
-        			// Should have WEBSITE_URL_ID
-        			log(" WEB_ID [" + bun.getString(WEBSITE_URL_ID) + "]");
-        			startWebActivity(p_context, bun.getString(WEBSITE_URL_ID));
-        		}
-        		else
-        		{
-        			// Should have PHONE_THREAD_ID
-        			startCallLogActivity(p_context, bun.getLong(PHONE_CALL_ID));
-        		}
-        	}
-        	else
-        	{
-            	startMessagingThreadActivity(p_context, bun.getLong(SMS_THREAD_ID));
-        	}
+			handleListClick(p_intent, p_context);
         }
         else if(p_intent.getAction().equals(ACTION_COMPOSE))
         {
@@ -361,6 +488,23 @@ public class MessagingProvider extends AppWidgetProvider
             // Currently does nothing - Add Web image
             updateTabs(R.id.notesTab, p_context);
         }
+        else if(p_intent.getAction().equals(PROFILE_TAB))
+        {
+        	log(" onReceive() - PROFILES tab selected");
+        	m_currentTab = R.id.profileTab;
+        	Intent serviceIntent = new Intent(p_context, ProfileService.class);
+        	// TODO: pass in class to generic function??? or just id..
+        	serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, p_intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID));
+            serviceIntent.setData(Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME)));
+
+            updateHelper(p_context, AppWidgetManager.getInstance(p_context), p_intent.getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID), serviceIntent);
+            // Notify the content has changed?
+            AppWidgetManager.getInstance(p_context).notifyAppWidgetViewDataChanged(
+            		AppWidgetManager.getInstance(p_context).getAppWidgetIds(new ComponentName(p_context, MessagingProvider.class )), R.id.message_list);  
+            // Currently does nothing - Add Web image
+            updateTabs(R.id.profileTab, p_context);
+        	
+        }
         else if(p_intent.getAction().equals(CONFIGURE_SETTINGS))
         {
         	log(" onRecieve - Settings activity launching");
@@ -390,6 +534,7 @@ public class MessagingProvider extends AppWidgetProvider
 	    
     	remoteViews.setImageViewResource(R.id.phoneTab, R.drawable.phone_white);
     	remoteViews.setImageViewResource(R.id.smsTab, R.drawable.sms_white);
+    	remoteViews.setImageViewResource(R.id.profileTab, R.drawable.profile_white);
     	
     	switch(p_currentTabID)
     	{
@@ -398,6 +543,9 @@ public class MessagingProvider extends AppWidgetProvider
     		break;
     	case R.id.phoneTab:
     		remoteViews.setImageViewResource(R.id.phoneTab, R.drawable.phone_blue);
+    		break;
+    	case R.id.profileTab:
+    		remoteViews.setImageViewResource(R.id.profileTab, R.drawable.profile_blue);
     		break;
     	
     	default: //TODO add other tabs as needed - remember to reset them all to white too

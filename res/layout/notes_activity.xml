@@ -13,9 +13,5 @@
         android:ems="10"
          />
 
-	<TextView
-	    android:id="@android/empty"
-	    an
-	    />
  </LinearLayout>
 

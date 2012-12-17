@@ -4,13 +4,21 @@
     <string name="configure_active">Active Listen: Enable to automatically refresh the display for incoming texts</string>
 	<string name="ok">OK</string>
 	
-	<!--  ImageButton descriptions -->
+	<!--  Image descriptions -->
 	<string name="smsDescription">SMS</string>
 	<string name="phoneDescription">Call log</string>
 	<string name="settingsDescription">Configure Settings</string>
 	<string name="callDescription">Call direction</string>
 	<string name="refreshDescription">Refresh!</string>
 	<string name="composeDescription">Start new</string>
+
+	<!--  Profiles -->
+	<string name="profileDescription">Profiles</string>
+	<string name="volumeDescription">Volume</string>
+	<string name="dataDescription">Data</string>
+	<string name="wifiDescription">Wifi</string>
+	
+	
 	<string name="webTabText">WEB</string>
 	<string name="emailTabText">EML</string>
 	<string name="notesTabText">NOT</string>

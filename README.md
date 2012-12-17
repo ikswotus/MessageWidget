@@ -6,11 +6,22 @@ TODO:
 
 -> Lockscreen widget? 4.2 supports this..could be fun
 
+// TABS //
+-> Implement a notepad activity (Basic tutorial should suffice) to allow notes to be added edited.
+-> Figure out how to pull emails and store in a local database
+-> Web activity needs to be improved -> List activity similar to the notes list
+
 
 // STYLE - LAYOUT //
--> Make the widget more transparent -> Look at alpha values for drawable backgrounds
--> Its pretty ugly right now...
--> Replace Tab text with icons. I think 2 icons per tab should suffice - A 'dark' one when the tab is not selective and a 'lit' one for when it's currently active.
+-> Need icons for:
+                Notes
+                Email
+                Web
+                *Alarm/Calendar (Todo)
+-> Currently with a dark background it's almost TOO transparent
+-> Size needs to be adjusted
+-> Make text/icons bigger? The emulator seems pretty good, but its too small on
+   the actual device
 
 
 // SMS //
@@ -19,6 +30,9 @@ TODO:
 
 
 // PHONE //
--> New layout - mimic the actual call log interface - Distinguish between incoming/outbound/missed..etc
--> "compose" should be relabeled as 'call' and open the dialer activity
--> "refresh" can probably stay the same.
+-> Clean up the layout: Phone number format, direction image size
+
+
+// LONG TERM //
+-> Dynamic tabs - Allow them to be added, removed, repositioned. (Use an activity for this?)
+-> Custom OS build -> Lock widget to the homescreen

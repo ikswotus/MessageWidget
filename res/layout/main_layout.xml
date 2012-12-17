@@ -62,8 +62,18 @@
 		    android:layout_height="32sp"
 		    android:layout_toRightOf="@id/emailTab"
 		    style="?android:attr/borderlessButtonStyle" />
-				
-   		<ImageButton
+		<ImageButton
+		    android:id="@+id/profileTab"
+		    android:contentDescription="@string/profileDescription"
+		    android:layout_width="32sp"
+		    android:layout_height="32sp"
+			android:drawablePadding="0dip"
+		    android:layout_toRightOf="@id/notesTab"
+		    android:src="@drawable/profile_white"
+		    android:scaleType="centerInside"
+		    style="?android:attr/borderlessButtonStyle" />
+
+		<ImageButton
 	    	android:id="@+id/settingsButton"
 	    	android:contentDescription="@string/settingsDescription"
 	    	android:layout_width="32sp"

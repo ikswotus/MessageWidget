@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/profile_row"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/cal_widget_bg"
+    >
+    
+    <!--  TODO: Format as follows:
+        "name" <image volume> <image data> <image wifi> <Green Check or Red X>
+     -->
+    
+    <TextView
+        android:id="@+id/profile_name"
+        android:layout_width="50dip"
+        android:layout_height="18dip" 
+        android:layout_alignParentLeft="true"
+        android:textSize="10sp"
+        android:textColor="@color/text_icsblue"
+    />
+	<ImageView 
+	    android:id="@+id/profile_volume"
+	    android:contentDescription="@string/volumeDescription"
+	    android:layout_width="32sp"
+	    android:layout_height="32sp"
+	    android:layout_toRightOf="@id/profile_name"
+	    android:src="@drawable/audio_loud"
+	    android:scaleType="centerInside"
+	    style="?android:attr/borderlessButtonStyle"
+	    />
+
+	<ImageView
+	    android:id="@+id/profile_data"
+	    android:contentDescription="@string/dataDescription"
+	    android:layout_width="32sp"
+	    android:layout_height="32sp"
+	    android:layout_toRightOf="@id/profile_volume"
+	    android:src="@drawable/data_disabled"
+	    android:scaleType="centerInside"
+	    style="?android:attr/borderlessButtonStyle"
+	    />
+	<ImageView
+	    android:id="@+id/profile_wifi"
+	    android:contentDescription="@string/wifiDescription"
+	    android:layout_width="32sp"
+	    android:layout_height="32sp"
+	    android:layout_toRightOf="@id/profile_data"
+	    android:src="@drawable/wifi_enabled"
+	    android:scaleType="centerInside"
+	    style="?android:attr/borderlessButtonStyle"
+	    />
+
+<!--  
+		    android:id="@+id/profileTab"
+		    android:contentDescription="@string/profileDescription"
+		    android:layout_width="32sp"
+		    android:layout_height="32sp"
+			android:drawablePadding="0dip"
+		    android:layout_toRightOf="@id/notesTab"
+		    android:src="@drawable/profile_white"
+		    android:scaleType="centerInside"
+		    style="?android:attr/borderlessButtonStyle" -->
+
+
+</RelativeLayout>
